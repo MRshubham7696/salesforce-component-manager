@@ -590,7 +590,7 @@
                 
                 // Try to get the components.json file
                 try {
-                    const file = await githubRequest('contents/data/components.json');
+                    const file = await githubRequest('contents/components.json');
                     const content = JSON.parse(atob(file.content));
                     components = content.components || [];
                     fileSha = file.sha;
