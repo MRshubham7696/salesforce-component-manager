@@ -1,17 +1,15 @@
 {
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "default",
-  "rsc": false,
-  "tsx": true,
-  "tailwind": {
-    "config": "tailwind.config.js",
-    "css": "app/globals.css",
-    "baseColor": "slate",
-    "cssVariables": true,
-    "prefix": ""
-  },
-  "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils"
-  }
+  "components": [
+    {
+      "id": "1751413029653",
+      "name": "Test",
+      "type": "Aura Component",
+      "description": "Test",
+      "version": "1",
+      "author": "",
+      "createdAt": "2025-07-01T23:37:09.653Z",
+      "updatedAt": "2025-07-01T23:37:09.653Z"
+    }
+  ],
+  "lastUpdated": "2025-07-01T23:37:09.653Z"
 }
