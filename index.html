@@ -633,7 +633,7 @@
                     commitData.sha = fileSha;
                 }
 
-                const result = await githubRequest('contents/data/components.json', 'PUT', commitData);
+                const result = await githubRequest('contents/components.json', 'PUT', commitData);
                 fileSha = result.content.sha;
                 
                 return true;
