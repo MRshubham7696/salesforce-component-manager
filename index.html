@@ -538,9 +538,10 @@
             const options = {
                 method,
                 headers: {
-                    'Authorization': `Token ${githubConfig.token}`,
+                    'Authorization': `token ${githubConfig.token}`,
                     'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Salesforce-Component-Manager' 
                 }
             };
 
@@ -548,14 +549,31 @@
                 options.body = JSON.stringify(data);
             }
 
-            const response = await fetch(url, options);
-            
-            if (!response.ok) {
-                const error = await response.json().catch(() => ({}));
-                throw new Error(error.message || `GitHub API error: ${response.status}`);
-            }
-
-            return response.json();
+               console.log('Making request...');
+                const response = await fetch(url, options);
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    
+                    let error;
+                    try {
+                        error = JSON.parse(errorText);
+                    } catch (e) {
+                        error = { message: errorText };
+                    }
+                    
+                    throw new Error(error.message || `GitHub API error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('Success! Response received');
+                console.log('=== End Debug ===');
+                
+                return result;
         }
 
         // Load components from GitHub
