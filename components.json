@@ -1,16 +1,6 @@
 {
   "components": [
     {
-      "id": "1751413184880",
-      "name": "vandana",
-      "type": "Aura Component",
-      "description": "xfk/.\\';'kligk.\":\\o\\[ ",
-      "version": "1",
-      "author": "vandana",
-      "createdAt": "2025-07-01T23:39:44.880Z",
-      "updatedAt": "2025-07-01T23:39:44.880Z"
-    },
-    {
       "id": "1751413029653",
       "name": "Test",
       "type": "Aura Component",
@@ -21,5 +11,5 @@
       "updatedAt": "2025-07-01T23:37:09.653Z"
     }
   ],
-  "lastUpdated": "2025-07-01T23:39:44.880Z"
+  "lastUpdated": "2025-07-01T23:39:59.213Z"
 }
