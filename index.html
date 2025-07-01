@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salesforce Component Manager</title>
-    
     <style>
         * {
             margin: 0;
@@ -16,369 +15,299 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
             padding: 20px;
         }
 
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
             padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
         .header h1 {
             font-size: 2.5rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
         }
 
         .header p {
-            color: #666;
+            opacity: 0.9;
             font-size: 1.1rem;
         }
 
+        .setup-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px 20px;
+            margin: 0;
+            color: #856404;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setup-notice.hidden {
+            display: none;
+        }
+
         .controls {
+            padding: 30px;
+            background: #f8f9fa;
             display: flex;
             gap: 20px;
-            margin-bottom: 30px;
             flex-wrap: wrap;
             align-items: center;
+            justify-content: space-between;
         }
 
         .search-container {
             flex: 1;
             min-width: 300px;
-            position: relative;
         }
 
-        .search-input {
+        .search-box {
             width: 100%;
-            padding: 15px 50px 15px 20px;
-            border: none;
-            border-radius: 50px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
             font-size: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
         }
 
-        .search-input:focus {
+        .search-box:focus {
             outline: none;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .search-icon {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #667eea;
-        }
-
-        .filter-select {
-            padding: 15px 20px;
-            border: none;
-            border-radius: 50px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            font-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-            transform: translateY(-2px);
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .btn {
-            padding: 15px 30px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 50px;
+            border-radius: 25px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.9);
-            color: #667eea;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
             color: white;
         }
 
-        .btn-danger:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+        .btn:hover {
+            transform: translateY(-2px);
         }
 
-        .component-grid {
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .grid {
+            padding: 30px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 25px;
-            margin-bottom: 30px;
         }
 
-        .component-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
         }
 
-        .component-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
 
-        .component-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
         }
 
-        .component-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .component-title {
-            font-size: 1.3rem;
+        .card-title {
+            font-size: 1.4rem;
             font-weight: 700;
-            color: #333;
             margin-bottom: 5px;
         }
 
-        .component-type {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 6px 15px;
+        .card-type {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-block;
         }
 
-        .component-description {
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-description {
             color: #666;
             margin-bottom: 15px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
-        .component-meta {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 15px;
             font-size: 0.9rem;
+            color: #888;
         }
 
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .status-active {
-            background: rgba(46, 213, 115, 0.2);
-            color: #27ae60;
-        }
-
-        .status-deprecated {
-            background: rgba(255, 107, 107, 0.2);
-            color: #e74c3c;
-        }
-
-        .component-actions {
+        .card-actions {
             display: flex;
             gap: 10px;
             justify-content: flex-end;
         }
 
-        .btn-small {
+        .btn-sm {
             padding: 8px 16px;
             font-size: 14px;
-            border-radius: 20px;
         }
 
         .modal {
             display: none;
             position: fixed;
-            top: 0;
+            z-index: 1000;
             left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-        }
-
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background-color: rgba(0,0,0,0.5);
         }
 
         .modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 600px;
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
             width: 90%;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .modal.show .modal-content {
-            transform: scale(1);
         }
 
         .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
         }
 
-        .modal-title {
-            font-size: 1.8rem;
-            color: #333;
-            font-weight: 700;
+        .modal-header h2 {
+            margin: 0;
         }
 
-        .close-btn {
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
             background: none;
             border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #999;
-            transition: color 0.3s ease;
         }
 
-        .close-btn:hover {
-            color: #333;
+        .close:hover {
+            opacity: 0.8;
+        }
+
+        .modal-body {
+            padding: 20px;
         }
 
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        .form-label {
+        .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             color: #333;
         }
 
-        .form-input, .form-select, .form-textarea {
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
             font-size: 16px;
-            transition: all 0.3s ease;
+            transition: border-color 0.3s ease;
         }
 
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .form-textarea {
+        .form-group textarea {
             resize: vertical;
             min-height: 100px;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-            margin-top: 30px;
-        }
-
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-            margin-top: 5px;
         }
 
         .empty-state {
@@ -387,31 +316,52 @@
             color: #666;
         }
 
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .setup-modal .modal-content {
+            max-width: 800px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .step {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            background: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .step h4 {
+            color: #667eea;
+            margin-bottom: 10px;
         }
 
         @media (max-width: 768px) {
             .controls {
                 flex-direction: column;
+                align-items: stretch;
             }
 
-            .search-container {
-                min-width: auto;
-            }
-
-            .component-grid {
+            .grid {
                 grid-template-columns: 1fr;
-            }
-
-            .component-meta {
-                grid-template-columns: 1fr;
-            }
-
-            .modal-content {
                 padding: 20px;
-                margin: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
             }
         }
     </style>
@@ -419,74 +369,76 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>⚡ Salesforce Component Manager</h1>
-            <p>Comprehensive component management system for Salesforce development</p>
+            <h1>🚀 Salesforce Component Manager</h1>
+            <p>Manage your Salesforce components with GitHub storage</p>
         </div>
 
-        <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-number" id="totalComponents">0</div>
-                <div class="stat-label">Total Components</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="activeComponents">0</div>
-                <div class="stat-label">Active Components</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="deprecatedComponents">0</div>
-                <div class="stat-label">Deprecated</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="componentTypes">0</div>
-                <div class="stat-label">Component Types</div>
-            </div>
+        <div id="setupNotice" class="setup-notice">
+            <span>⚠️</span>
+            <span>GitHub token required for data storage. <button onclick="openSetupModal()" style="background:none;border:none;color:#856404;text-decoration:underline;cursor:pointer;">Click here to set up</button></span>
         </div>
 
         <div class="controls">
             <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search components by name, description, or repository...">
-                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-box" placeholder="Search components by name, type, or description...">
             </div>
-            <select id="typeFilter" class="filter-select">
-                <option value="">All Types</option>
-                <option value="Apex Class">Apex Class</option>
-                <option value="Apex Trigger">Apex Trigger</option>
-                <option value="Lightning Web Component">Lightning Web Component</option>
-                <option value="Aura Component">Aura Component</option>
-                <option value="Flow">Flow</option>
-                <option value="Process Builder">Process Builder</option>
-                <option value="Workflow Rule">Workflow Rule</option>
-                <option value="Validation Rule">Validation Rule</option>
-                <option value="Custom Object">Custom Object</option>
-                <option value="Custom Field">Custom Field</option>
-                <option value="Permission Set">Permission Set</option>
-                <option value="Profile">Profile</option>
-                <option value="Report">Report</option>
-                <option value="Dashboard">Dashboard</option>
-                <option value="Email Template">Email Template</option>
-                <option value="Static Resource">Static Resource</option>
-            </select>
-            <select id="statusFilter" class="filter-select">
-                <option value="">All Status</option>
-                <option value="Active">Active</option>
-                <option value="Deprecated">Deprecated</option>
-            </select>
-            <select id="sortBy" class="filter-select">
-                <option value="name">Sort by Name</option>
-                <option value="type">Sort by Type</option>
-                <option value="created">Sort by Created Date</option>
-                <option value="modified">Sort by Modified Date</option>
-            </select>
-            <button class="btn btn-primary" id="addComponentBtn">➕ Add Component</button>
+            <button id="addComponentBtn" class="btn btn-primary">+ Add Component</button>
+            <button id="refreshBtn" class="btn btn-success">🔄 Refresh</button>
+            <button id="setupBtn" class="btn" onclick="openSetupModal()">⚙️ Setup</button>
         </div>
 
-        <div id="componentGrid" class="component-grid"></div>
+        <div id="loadingDiv" class="loading">
+            <div class="spinner"></div>
+            Loading components from GitHub...
+        </div>
+
+        <div id="componentsGrid" class="grid" style="display: none;"></div>
 
         <div id="emptyState" class="empty-state" style="display: none;">
-            <div class="empty-icon">📦</div>
-            <h3>No components found</h3>
-            <p>Start by adding your first Salesforce component to track your development work.</p>
-            <button class="btn btn-primary" onclick="componentManager.openAddModal()">Add Your First Component</button>
+            <h3>No Components Found</h3>
+            <p>Start by adding your first Salesforce component!</p>
+            <button class="btn btn-primary" onclick="openAddModal()">+ Add Your First Component</button>
+        </div>
+    </div>
+
+    <!-- Setup Modal -->
+    <div id="setupModal" class="modal setup-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>GitHub Setup Instructions</h2>
+                <button class="close" onclick="closeSetupModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="step">
+                    <h4>Step 1: Create a GitHub Personal Access Token</h4>
+                    <p>1. Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)</a></p>
+                    <p>2. Click "Generate new token" → "Generate new token (classic)"</p>
+                    <p>3. Give it a name like "Component Manager"</p>
+                    <p>4. Select these scopes: <strong>repo</strong> (Full control of private repositories)</p>
+                    <p>5. Click "Generate token" and copy the token</p>
+                </div>
+
+                <div class="step">
+                    <h4>Step 2: Enter Your Details</h4>
+                    <div class="form-group">
+                        <label for="githubUsername">GitHub Username:</label>
+                        <input type="text" id="githubUsername" placeholder="Your GitHub username">
+                    </div>
+                    <div class="form-group">
+                        <label for="githubRepo">Repository Name:</label>
+                        <input type="text" id="githubRepo" value="salesforce-component-manager" placeholder="Repository name">
+                    </div>
+                    <div class="form-group">
+                        <label for="githubToken">Personal Access Token:</label>
+                        <input type="password" id="githubToken" placeholder="Paste your token here">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="btn" onclick="closeSetupModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="saveGitHubConfig()">Save Configuration</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -494,391 +446,420 @@
     <div id="componentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Add Component</h2>
-                <button class="close-btn" onclick="componentManager.closeModal()">&times;</button>
+                <h2 id="modalTitle">Add New Component</h2>
+                <button class="close" onclick="closeModal()">&times;</button>
             </div>
-            <form id="componentForm">
-                <div class="form-group">
-                    <label class="form-label" for="componentName">Component Name*</label>
-                    <input type="text" id="componentName" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="componentType">Component Type*</label>
-                    <select id="componentType" class="form-select" required>
-                        <option value="">Select Type</option>
-                        <option value="Apex Class">Apex Class</option>
-                        <option value="Apex Trigger">Apex Trigger</option>
-                        <option value="Lightning Web Component">Lightning Web Component</option>
-                        <option value="Aura Component">Aura Component</option>
-                        <option value="Flow">Flow</option>
-                        <option value="Process Builder">Process Builder</option>
-                        <option value="Workflow Rule">Workflow Rule</option>
-                        <option value="Validation Rule">Validation Rule</option>
-                        <option value="Custom Object">Custom Object</option>
-                        <option value="Custom Field">Custom Field</option>
-                        <option value="Permission Set">Permission Set</option>
-                        <option value="Profile">Profile</option>
-                        <option value="Report">Report</option>
-                        <option value="Dashboard">Dashboard</option>
-                        <option value="Email Template">Email Template</option>
-                        <option value="Static Resource">Static Resource</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="componentDescription">Description</label>
-                    <textarea id="componentDescription" class="form-textarea" placeholder="Describe the component's purpose and functionality..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="componentRepository">Repository</label>
-                    <input type="text" id="componentRepository" class="form-input" placeholder="GitHub repository URL or name">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="componentAuthor">Author</label>
-                    <input type="text" id="componentAuthor" class="form-input" placeholder="Component author">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="componentStatus">Status*</label>
-                    <select id="componentStatus" class="form-select" required>
-                        <option value="Active">Active</option>
-                        <option value="Deprecated">Deprecated</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="componentTags">Tags</label>
-                    <input type="text" id="componentTags" class="form-input" placeholder="Comma-separated tags (e.g., utility, trigger, validation)">
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="componentManager.closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Component</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content" style="max-width: 400px;">
-            <div class="modal-header">
-                <h2 class="modal-title">Confirm Delete</h2>
-                <button class="close-btn" onclick="componentManager.closeDeleteModal()">&times;</button>
-            </div>
-            <p>Are you sure you want to delete this component? This action cannot be undone.</p>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="componentManager.closeDeleteModal()">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="componentManager.confirmDelete()">Delete</button>
+            <div class="modal-body">
+                <form id="componentForm">
+                    <div class="form-group">
+                        <label for="componentName">Component Name *</label>
+                        <input type="text" id="componentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="componentType">Component Type *</label>
+                        <select id="componentType" required>
+                            <option value="">Select Type</option>
+                            <option value="Lightning Web Component">Lightning Web Component</option>
+                            <option value="Aura Component">Aura Component</option>
+                            <option value="Apex Class">Apex Class</option>
+                            <option value="Flow">Flow</option>
+                            <option value="Trigger">Trigger</option>
+                            <option value="Custom Object">Custom Object</option>
+                            <option value="Visualforce">Visualforce</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="componentDescription">Description</label>
+                        <textarea id="componentDescription" placeholder="Describe what this component does..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="componentVersion">Version</label>
+                        <input type="text" id="componentVersion" placeholder="e.g., 1.0.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="componentAuthor">Author</label>
+                        <input type="text" id="componentAuthor" placeholder="Component author">
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Component</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <script>
-        // Component Management System
-        class ComponentManager {
-            constructor() {
-                this.components = this.loadComponents();
-                this.currentEditId = null;
-                this.deleteId = null;
-                this.init();
-            }
+        // GitHub Configuration
+        let githubConfig = {
+            username: 'MRshubham7696',
+            repo: 'salesforce-component-manager',
+            token: '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',
+            branch: 'main'
+        };
 
-            init() {
-                this.renderComponents();
-                this.updateStats();
-                this.bindEvents();
-                this.checkEmptyState();
-            }
+        // Global variables
+        let components = [];
+        let editingComponentId = null;
+        let fileSha = null; // For updating existing files
 
-            loadComponents() {
-                // Return sample data if no components exist
-                const stored = [];
-                return stored.length > 0 ? stored : this.getSampleComponents();
-            }
+        // DOM Elements
+        const loadingDiv = document.getElementById('loadingDiv');
+        const componentsGrid = document.getElementById('componentsGrid');
+        const emptyState = document.getElementById('emptyState');
+        const searchInput = document.getElementById('searchInput');
+        const componentModal = document.getElementById('componentModal');
+        const setupModal = document.getElementById('setupModal');
+        const componentForm = document.getElementById('componentForm');
+        const modalTitle = document.getElementById('modalTitle');
+        const setupNotice = document.getElementById('setupNotice');
 
-            getSampleComponents() {
-                return [
-                    {
-                        id: 1,
-                        name: "AccountTriggerHandler",
-                        type: "Apex Class",
-                        description: "Handles all Account trigger logic including validation, field updates, and related record management.",
-                        repository: "salesforce-org/account-management",
-                        author: "John Smith",
-                        status: "Active",
-                        tags: ["trigger", "account", "handler"],
-                        created: new Date('2024-01-15'),
-                        modified: new Date('2024-02-01')
-                    },
-                    {
-                        id: 2,
-                        name: "OpportunityLineItemTrigger",
-                        type: "Apex Trigger",
-                        description: "Triggers business logic when Opportunity Line Items are created, updated, or deleted.",
-                        repository: "salesforce-org/opportunity-management",
-                        author: "Sarah Johnson",
-                        status: "Active",
-                        tags: ["trigger", "opportunity", "line-item"],
-                        created: new Date('2024-01-20'),
-                        modified: new Date('2024-01-25')
-                    },
-                    {
-                        id: 3,
-                        name: "ContactListLWC",
-                        type: "Lightning Web Component",
-                        description: "Displays a searchable and filterable list of contacts with pagination support.",
-                        repository: "salesforce-org/lwc-components",
-                        author: "Mike Wilson",
-                        status: "Active",
-                        tags: ["lwc", "contact", "list", "ui"],
-                        created: new Date('2024-02-01'),
-                        modified: new Date('2024-02-10')
-                    },
-                    {
-                        id: 4,
-                        name: "LeadConversionFlow",
-                        type: "Flow",
-                        description: "Automated flow for converting qualified leads to accounts, contacts, and opportunities.",
-                        repository: "salesforce-org/automation-flows",
-                        author: "Emily Davis",
-                        status: "Active",
-                        tags: ["flow", "lead", "conversion", "automation"],
-                        created: new Date('2024-01-10'),
-                        modified: new Date('2024-01-30')
-                    },
-                    {
-                        id: 5,
-                        name: "LegacyAccountValidation",
-                        type: "Validation Rule",
-                        description: "Old validation rule for account fields - replaced by newer trigger-based validation.",
-                        repository: "salesforce-org/legacy-validation",
-                        author: "Robert Brown",
-                        status: "Deprecated",
-                        tags: ["validation", "account", "legacy"],
-                        created: new Date('2023-06-15'),
-                        modified: new Date('2023-12-01')
-                    }
-                ];
-            }
-
-            saveComponents() {
-                // In a real application, this would save to a database
-            }
-
-            bindEvents() {
-                document.getElementById('addComponentBtn').addEventListener('click', () => this.openAddModal());
-                document.getElementById('componentForm').addEventListener('submit', (e) => this.handleSubmit(e));
-                document.getElementById('searchInput').addEventListener('input', () => this.filterComponents());
-                document.getElementById('typeFilter').addEventListener('change', () => this.filterComponents());
-                document.getElementById('statusFilter').addEventListener('change', () => this.filterComponents());
-                document.getElementById('sortBy').addEventListener('change', () => this.filterComponents());
-
-                document.getElementById('componentModal').addEventListener('click', (e) => {
-                    if (e.target === document.getElementById('componentModal')) {
-                        this.closeModal();
-                    }
-                });
-                document.getElementById('deleteModal').addEventListener('click', (e) => {
-                    if (e.target === document.getElementById('deleteModal')) {
-                        this.closeDeleteModal();
-                    }
-                });
-            }
-
-            openAddModal() {
-                this.currentEditId = null;
-                document.getElementById('modalTitle').textContent = 'Add Component';
-                document.getElementById('componentForm').reset();
-                document.getElementById('componentModal').classList.add('show');
-                document.body.style.overflow = 'hidden';
-            }
-
-            openEditModal(id) {
-                this.currentEditId = id;
-                const component = this.components.find(c => c.id === id);
-                if (!component) return;
-
-                document.getElementById('modalTitle').textContent = 'Edit Component';
-                document.getElementById('componentName').value = component.name;
-                document.getElementById('componentType').value = component.type;
-                document.getElementById('componentDescription').value = component.description || '';
-                document.getElementById('componentRepository').value = component.repository || '';
-                document.getElementById('componentAuthor').value = component.author || '';
-                document.getElementById('componentStatus').value = component.status;
-                document.getElementById('componentTags').value = component.tags ? component.tags.join(', ') : '';
-
-                document.getElementById('componentModal').classList.add('show');
-                document.body.style.overflow = 'hidden';
-            }
-
-            closeModal() {
-                document.getElementById('componentModal').classList.remove('show');
-                document.body.style.overflow = 'auto';
-                setTimeout(() => {
-                    document.getElementById('componentForm').reset();
-                    this.currentEditId = null;
-                }, 300);
-            }
-
-            openDeleteModal(id) {
-                this.deleteId = id;
-                document.getElementById('deleteModal').classList.add('show');
-                document.body.style.overflow = 'hidden';
-            }
-
-            closeDeleteModal() {
-                document.getElementById('deleteModal').classList.remove('show');
-                document.body.style.overflow = 'auto';
-                this.deleteId = null;
-            }
-
-            confirmDelete() {
-                if (this.deleteId) {
-                    this.components = this.components.filter(c => c.id !== this.deleteId);
-                    this.saveComponents();
-                    this.renderComponents();
-                    this.updateStats();
-                    this.checkEmptyState();
-                    this.closeDeleteModal();
+        // Load configuration from localStorage
+        function loadConfig() {
+            const saved = localStorage.getItem('githubConfig');
+            if (saved) {
+                githubConfig = JSON.parse(saved);
+                if (githubConfig.username && githubConfig.token) {
+                    setupNotice.classList.add('hidden');
+                    return true;
                 }
             }
+            return false;
+        }
 
-            handleSubmit(e) {
-                e.preventDefault();
+        // Save configuration to localStorage
+        function saveConfig() {
+            localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
+        }
 
-                const componentData = {
-                    name: document.getElementById('componentName').value.trim(),
-                    type: document.getElementById('componentType').value,
-                    description: document.getElementById('componentDescription').value.trim(),
-                    repository: document.getElementById('componentRepository').value.trim(),
-                    author: document.getElementById('componentAuthor').value.trim(),
-                    status: document.getElementById('componentStatus').value,
-                    tags: document.getElementById('componentTags').value.split(',').map(tag => tag.trim()).filter(tag => tag)
-                };
-
-                if (!componentData.name || !componentData.type || !componentData.status) {
-                    alert('Please fill in all required fields.');
-                    return;
+        // GitHub API functions
+        async function githubRequest(endpoint, method = 'GET', data = null) {
+            const url = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/${endpoint}`;
+            const options = {
+                method,
+                headers: {
+                    'Authorization': `token ${githubConfig.token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
                 }
+            };
 
-                if (this.currentEditId) {
-                    const idx = this.components.findIndex(c => c.id === this.currentEditId);
-                    if (idx > -1) {
-                        this.components[idx] = {
-                            ...this.components[idx],
-                            ...componentData,
-                            modified: new Date()
-                        };
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(url, options);
+            
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || `GitHub API error: ${response.status}`);
+            }
+
+            return response.json();
+        }
+
+        // Load components from GitHub
+        async function loadComponents() {
+            if (!githubConfig.token) {
+                setupNotice.classList.remove('hidden');
+                showLoading(false);
+                displayComponents([]);
+                return;
+            }
+
+            try {
+                showLoading(true);
+                
+                // Try to get the components.json file
+                try {
+                    const file = await githubRequest('contents/data/components.json');
+                    const content = JSON.parse(atob(file.content));
+                    components = content.components || [];
+                    fileSha = file.sha;
+                } catch (error) {
+                    // File doesn't exist yet, start with empty array
+                    if (error.message.includes('404')) {
+                        components = [];
+                        fileSha = null;
+                    } else {
+                        throw error;
                     }
-                } else {
-                    this.components.push({
-                        id: Date.now(),
-                        ...componentData,
-                        created: new Date(),
-                        modified: new Date()
-                    });
                 }
 
-                this.saveComponents();
-                this.renderComponents();
-                this.updateStats();
-                this.checkEmptyState();
-                this.closeModal();
-            }
-
-            filterComponents() {
-                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-                const typeFilter = document.getElementById('typeFilter').value;
-                const statusFilter = document.getElementById('statusFilter').value;
-                const sortBy = document.getElementById('sortBy').value;
-
-                let filtered = this.components.filter(c => {
-                    const matchesSearch = !searchTerm ||
-                        c.name.toLowerCase().includes(searchTerm) ||
-                        c.description?.toLowerCase().includes(searchTerm) ||
-                        c.repository?.toLowerCase().includes(searchTerm) ||
-                        c.author?.toLowerCase().includes(searchTerm) ||
-                        c.tags?.some(t => t.toLowerCase().includes(searchTerm));
-
-                    const matchesType = !typeFilter || c.type === typeFilter;
-                    const matchesStatus = !statusFilter || c.status === statusFilter;
-                    return matchesSearch && matchesType && matchesStatus;
-                });
-
-                filtered.sort((a, b) => {
-                    switch (sortBy) {
-                        case 'name': return a.name.localeCompare(b.name);
-                        case 'type': return a.type.localeCompare(b.type);
-                        case 'created': return b.created - a.created;
-                        case 'modified': return b.modified - a.modified;
-                        default: return a.name.localeCompare(b.name);
-                    }
-                });
-
-                this.renderFilteredComponents(filtered);
-            }
-
-            renderFilteredComponents(components) {
-                const grid = document.getElementById('componentGrid');
-                if (components.length === 0) {
-                    grid.innerHTML = '';
-                    document.getElementById('emptyState').style.display = 'block';
-                    return;
-                }
-                document.getElementById('emptyState').style.display = 'none';
-                grid.innerHTML = components.map(c => this.createComponentCard(c)).join('');
-            }
-
-            renderComponents() {
-                this.filterComponents();
-            }
-
-            createComponentCard(c) {
-                const created = new Date(c.created).toLocaleDateString();
-                const modified = new Date(c.modified).toLocaleDateString();
-                const tags = (c.tags||[]).map(t => `<span class="status-badge" style="margin-right:4px; background:#eee;color:#333;">${t}</span>`).join(' ');
-                const statusClass = c.status === 'Active' ? 'status-active' : 'status-deprecated';
-
-                return `
-                <div class="component-card">
-                    <div class="component-header">
-                        <div>
-                            <div class="component-title">${c.name}</div>
-                            <div class="component-type">${c.type}</div>
-                        </div>
-                        <div class="status-badge ${statusClass}">${c.status}</div>
-                    </div>
-                    <div class="component-description">${c.description||''}</div>
-                    <div class="component-meta">
-                        <div class="meta-item"><strong>Created:</strong> ${created}</div>
-                        <div class="meta-item"><strong>Modified:</strong> ${modified}</div>
-                        <div class="meta-item"><strong>Author:</strong> ${c.author||'-'}</div>
-                        <div class="meta-item"><strong>Repo:</strong> <a href="${c.repository||'#'}" target="_blank">${c.repository||'-'}</a></div>
-                    </div>
-                    <div class="component-meta">
-                        <div class="meta-item"><strong>Tags:</strong> ${tags||'-'}</div>
-                    </div>
-                    <div class="component-actions">
-                        <button class="btn btn-small btn-secondary" onclick="componentManager.openEditModal(${c.id})">Edit</button>
-                        <button class="btn btn-small btn-danger" onclick="componentManager.openDeleteModal(${c.id})">Delete</button>
-                    </div>
-                </div>`;
-            }
-
-            updateStats() {
-                document.getElementById('totalComponents').textContent = this.components.length;
-                document.getElementById('activeComponents').textContent = this.components.filter(c=>c.status==='Active').length;
-                document.getElementById('deprecatedComponents').textContent = this.components.filter(c=>c.status==='Deprecated').length;
-                document.getElementById('componentTypes').textContent = new Set(this.components.map(c=>c.type)).size;
-            }
-
-            checkEmptyState() {
-                const empty = this.components.length === 0;
-                document.getElementById('componentGrid').style.display = empty?'none':'grid';
-                document.getElementById('emptyState').style.display = empty?'block':'none';
+                displayComponents(components);
+                showLoading(false);
+            } catch (error) {
+                console.error("Error loading components:", error);
+                showLoading(false);
+                alert(`Error loading components: ${error.message}`);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            window.componentManager = new ComponentManager();
+        // Save components to GitHub
+        async function saveComponents() {
+            try {
+                const data = {
+                    components: components,
+                    lastUpdated: new Date().toISOString()
+                };
+
+                const content = btoa(JSON.stringify(data, null, 2));
+                
+                const commitData = {
+                    message: `Update components data - ${new Date().toLocaleString()}`,
+                    content: content,
+                    branch: githubConfig.branch
+                };
+
+                if (fileSha) {
+                    commitData.sha = fileSha;
+                }
+
+                const result = await githubRequest('contents/data/components.json', 'PUT', commitData);
+                fileSha = result.content.sha;
+                
+                return true;
+            } catch (error) {
+                console.error("Error saving components:", error);
+                alert(`Error saving components: ${error.message}`);
+                return false;
+            }
+        }
+
+        // Display components
+        function displayComponents(componentsToShow) {
+            if (componentsToShow.length === 0) {
+                componentsGrid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            componentsGrid.style.display = 'grid';
+            
+            componentsGrid.innerHTML = componentsToShow.map(component => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${component.name}</div>
+                        <div class="card-type">${component.type}</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-description">${component.description || 'No description provided'}</div>
+                        <div class="card-meta">
+                            <span>Version: ${component.version || 'N/A'}</span>
+                            <span>Author: ${component.author || 'Unknown'}</span>
+                        </div>
+                        <div class="card-meta">
+                            <span>Created: ${component.createdAt ? new Date(component.createdAt).toLocaleDateString() : 'N/A'}</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-primary btn-sm" onclick="editComponent('${component.id}')">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteComponent('${component.id}')">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Show/hide loading
+        function showLoading(show) {
+            loadingDiv.style.display = show ? 'block' : 'none';
+            if (!show) {
+                componentsGrid.style.display = components.length > 0 ? 'grid' : 'none';
+            }
+        }
+
+        // Add new component
+        async function addComponent(componentData) {
+            const newComponent = {
+                id: Date.now().toString(),
+                ...componentData,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            components.unshift(newComponent);
+            
+            if (await saveComponents()) {
+                displayComponents(components);
+                closeModal();
+                alert("Component added successfully!");
+            } else {
+                // Remove the component if save failed
+                components.shift();
+            }
+        }
+
+        // Update component
+        async function updateComponent(componentId, componentData) {
+            const index = components.findIndex(c => c.id === componentId);
+            if (index === -1) return;
+
+            const originalComponent = { ...components[index] };
+            components[index] = {
+                ...components[index],
+                ...componentData,
+                updatedAt: new Date().toISOString()
+            };
+
+            if (await saveComponents()) {
+                displayComponents(components);
+                closeModal();
+                alert("Component updated successfully!");
+            } else {
+                // Restore original component if save failed
+                components[index] = originalComponent;
+            }
+        }
+
+        // Delete component
+        window.deleteComponent = async function(componentId) {
+            if (!confirm("Are you sure you want to delete this component?")) {
+                return;
+            }
+
+            const index = components.findIndex(c => c.id === componentId);
+            if (index === -1) return;
+
+            const removedComponent = components.splice(index, 1)[0];
+
+            if (await saveComponents()) {
+                displayComponents(components);
+                alert("Component deleted successfully!");
+            } else {
+                // Restore component if save failed
+                components.splice(index, 0, removedComponent);
+            }
+        };
+
+        // Edit component
+        window.editComponent = function(componentId) {
+            const component = components.find(c => c.id === componentId);
+            if (!component) return;
+
+            editingComponentId = componentId;
+            modalTitle.textContent = "Edit Component";
+            
+            document.getElementById('componentName').value = component.name;
+            document.getElementById('componentType').value = component.type;
+            document.getElementById('componentDescription').value = component.description || '';
+            document.getElementById('componentVersion').value = component.version || '';
+            document.getElementById('componentAuthor').value = component.author || '';
+            
+            componentModal.style.display = 'block';
+        };
+
+        // Open add modal
+        window.openAddModal = function() {
+            if (!githubConfig.token) {
+                openSetupModal();
+                return;
+            }
+            
+            editingComponentId = null;
+            modalTitle.textContent = "Add New Component";
+            componentForm.reset();
+            componentModal.style.display = 'block';
+        };
+
+        // Close modal
+        window.closeModal = function() {
+            componentModal.style.display = 'none';
+            componentForm.reset();
+            editingComponentId = null;
+        };
+
+        // Setup modal functions
+        window.openSetupModal = function() {
+            if (githubConfig.username) {
+                document.getElementById('githubUsername').value = githubConfig.username;
+            }
+            if (githubConfig.repo) {
+                document.getElementById('githubRepo').value = githubConfig.repo;
+            }
+            setupModal.style.display = 'block';
+        };
+
+        window.closeSetupModal = function() {
+            setupModal.style.display = 'none';
+        };
+
+        window.saveGitHubConfig = function() {
+            const username = document.getElementById('githubUsername').value.trim();
+            const repo = document.getElementById('githubRepo').value.trim();
+            const token = document.getElementById('githubToken').value.trim();
+
+            if (!username || !repo || !token) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            githubConfig.username = username;
+            githubConfig.repo = repo;
+            githubConfig.token = token;
+            
+            saveConfig();
+            setupNotice.classList.add('hidden');
+            closeSetupModal();
+            
+            // Clear the token field for security
+            document.getElementById('githubToken').value = '';
+            
+            // Load components with new config
+            loadComponents();
+        };
+
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const filteredComponents = components.filter(component =>
+                component.name.toLowerCase().includes(searchTerm) ||
+                component.type.toLowerCase().includes(searchTerm) ||
+                (component.description && component.description.toLowerCase().includes(searchTerm))
+            );
+            displayComponents(filteredComponents);
         });
+
+        // Form submission
+        componentForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const componentData = {
+                name: document.getElementById('componentName').value,
+                type: document.getElementById('componentType').value,
+                description: document.getElementById('componentDescription').value,
+                version: document.getElementById('componentVersion').value,
+                author: document.getElementById('componentAuthor').value
+            };
+
+            if (editingComponentId) {
+                await updateComponent(editingComponentId, componentData);
+            } else {
+                await addComponent(componentData);
+            }
+        });
+
+        // Event listeners
+        document.getElementById('addComponentBtn').addEventListener('click', openAddModal);
+        document.getElementById('refreshBtn').addEventListener('click', loadComponents);
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === componentModal) {
+                closeModal();
+            }
+            if (event.target === setupModal) {
+                closeSetupModal();
+            }
+        });
+
+        // Initialize app
+        if (loadConfig()) {
+            loadComponents();
+        } else {
+            showLoading(false);
+            displayComponents([]);
+        }
     </script>
 </body>
 </html>
