@@ -1,15 +1,101 @@
+// Encryption/Decryption Functions
+async function encryptData(data, password) {
+    const encoder = new TextEncoder();
+    const dataBuffer = encoder.encode(JSON.stringify(data));
+    
+    // Create a key from password
+    const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        encoder.encode(password),
+        'PBKDF2',
+        false,
+        ['deriveKey']
+    );
+    
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const key = await crypto.subtle.deriveKey(
+        {
+            name: 'PBKDF2',
+            salt: salt,
+            iterations: 100000,
+            hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt']
+    );
+    
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encrypted = await crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv: iv },
+        key,
+        dataBuffer
+    );
+    
+    // Combine salt, iv, and encrypted data
+    const result = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+    result.set(salt, 0);
+    result.set(iv, salt.length);
+    result.set(new Uint8Array(encrypted), salt.length + iv.length);
+    
+    return btoa(String.fromCharCode.apply(null, result));
+}
+
+async function decryptData(encryptedData, password) {
+    const encoder = new TextEncoder();
+    const data = new Uint8Array(atob(encryptedData).split('').map(char => char.charCodeAt(0)));
+    
+    // Extract salt, iv, and encrypted data
+    const salt = data.slice(0, 16);
+    const iv = data.slice(16, 28);
+    const encrypted = data.slice(28);
+    
+    // Recreate key from password
+    const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        encoder.encode(password),
+        'PBKDF2',
+        false,
+        ['deriveKey']
+    );
+    
+    const key = await crypto.subtle.deriveKey(
+        {
+            name: 'PBKDF2',
+            salt: salt,
+            iterations: 100000,
+            hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+    );
+    
+    const decrypted = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: iv },
+        key,
+        encrypted
+    );
+    
+    const decoder = new TextDecoder();
+    return JSON.parse(decoder.decode(decrypted));
+}
+
 // GitHub Configuration
 let githubConfig = {
     username: '',
     repo: 'salesforce-component-manager',
     token: '',
-    branch: 'main'
+    branch: 'main',
+    encryptionPassword: ''
 };
 
 // Global variables
 let components = [];
 let editingComponentId = null;
-let fileSha = null; // For updating existing files
+let fileSha = null;
 
 // DOM Elements
 const loadingDiv = document.getElementById('loadingDiv');
@@ -27,7 +113,7 @@ function loadConfig() {
     const saved = localStorage.getItem('githubConfig');
     if (saved) {
         githubConfig = JSON.parse(saved);
-        if (githubConfig.username && githubConfig.token) {
+        if (githubConfig.username && githubConfig.token && githubConfig.encryptionPassword) {
             setupNotice.classList.add('hidden');
             return true;
         }
@@ -60,7 +146,6 @@ async function githubRequest(endpoint, method = 'GET', data = null) {
     const response = await fetch(url, options);
     
     console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
     
     if (!response.ok) {
         const errorText = await response.text();
@@ -78,14 +163,13 @@ async function githubRequest(endpoint, method = 'GET', data = null) {
     
     const result = await response.json();
     console.log('Success! Response received');
-    console.log('=== End Debug ===');
     
     return result;
 }
 
-// Component Management
+// Component Management with Encryption
 async function loadComponents() {
-    if (!githubConfig.token) {
+    if (!githubConfig.token || !githubConfig.encryptionPassword) {
         setupNotice.classList.remove('hidden');
         showLoading(false);
         displayComponents([]);
@@ -95,17 +179,20 @@ async function loadComponents() {
     try {
         showLoading(true);
         
-        // Try to get the components.json file
         try {
             const file = await githubRequest('contents/components.json');
-            const content = JSON.parse(atob(file.content));
+            const encryptedContent = atob(file.content);
+            
+            // Decrypt the content
+            const content = await decryptData(encryptedContent, githubConfig.encryptionPassword);
             components = content.components || [];
             fileSha = file.sha;
         } catch (error) {
-            // File doesn't exist yet, start with empty array
             if (error.message.includes('404')) {
                 components = [];
                 fileSha = null;
+            } else if (error.name === 'OperationError' || error.message.includes('decrypt')) {
+                throw new Error('Failed to decrypt data. Please check your encryption password.');
             } else {
                 throw error;
             }
@@ -122,16 +209,23 @@ async function loadComponents() {
 
 async function saveComponents() {
     try {
+        if (!githubConfig.encryptionPassword) {
+            throw new Error('Encryption password not set');
+        }
+        
         const data = {
             components: components,
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
+            encrypted: true,
+            version: '1.0'
         };
 
-        const content = btoa(JSON.stringify(data, null, 2));
+        // Encrypt the data
+        const encryptedContent = await encryptData(data, githubConfig.encryptionPassword);
         
         const commitData = {
-            message: `Update components data - ${new Date().toLocaleString()}`,
-            content: content,
+            message: `Update encrypted components data - ${new Date().toLocaleString()}`,
+            content: btoa(encryptedContent),
             branch: githubConfig.branch
         };
 
@@ -165,7 +259,6 @@ async function addComponent(componentData) {
         closeModal();
         alert("Component added successfully!");
     } else {
-        // Remove the component if save failed
         components.shift();
     }
 }
@@ -186,7 +279,6 @@ async function updateComponent(componentId, componentData) {
         closeModal();
         alert("Component updated successfully!");
     } else {
-        // Restore original component if save failed
         components[index] = originalComponent;
     }
 }
@@ -233,7 +325,7 @@ function showLoading(show) {
     }
 }
 
-// Global Functions (exposed to window)
+// Global Functions
 window.deleteComponent = async function(componentId) {
     if (!confirm("Are you sure you want to delete this component?")) {
         return;
@@ -248,7 +340,6 @@ window.deleteComponent = async function(componentId) {
         displayComponents(components);
         alert("Component deleted successfully!");
     } else {
-        // Restore component if save failed
         components.splice(index, 0, removedComponent);
     }
 };
@@ -270,7 +361,7 @@ window.editComponent = function(componentId) {
 };
 
 window.openAddModal = function() {
-    if (!githubConfig.token) {
+    if (!githubConfig.token || !githubConfig.encryptionPassword) {
         openSetupModal();
         return;
     }
@@ -306,30 +397,37 @@ window.saveGitHubConfig = function() {
     const username = document.getElementById('githubUsername').value.trim();
     const repo = document.getElementById('githubRepo').value.trim();
     const token = document.getElementById('githubToken').value.trim();
+    const encryptionPassword = document.getElementById('encryptionPassword').value.trim();
 
-    if (!username || !repo || !token) {
-        alert('Please fill in all fields');
+    if (!username || !repo || !token || !encryptionPassword) {
+        alert('Please fill in all fields including the encryption password');
+        return;
+    }
+
+    if (encryptionPassword.length < 8) {
+        alert('Encryption password must be at least 8 characters long');
         return;
     }
 
     githubConfig.username = username;
     githubConfig.repo = repo;
     githubConfig.token = token;
+    githubConfig.encryptionPassword = encryptionPassword;
     
     saveConfig();
     setupNotice.classList.add('hidden');
     closeSetupModal();
     
-    // Clear the token field for security
+    // Clear sensitive fields for security
     document.getElementById('githubToken').value = '';
+    document.getElementById('encryptionPassword').value = '';
     
-    // Load components with new config
+    alert('Configuration saved! Your data will now be encrypted before storage.');
     loadComponents();
 };
 
 // Event Listeners
 function initializeEventListeners() {
-    // Search functionality
     searchInput.addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase();
         const filteredComponents = components.filter(component =>
@@ -340,7 +438,6 @@ function initializeEventListeners() {
         displayComponents(filteredComponents);
     });
 
-    // Form submission
     componentForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -359,11 +456,9 @@ function initializeEventListeners() {
         }
     });
 
-    // Button event listeners
     document.getElementById('addComponentBtn').addEventListener('click', openAddModal);
     document.getElementById('refreshBtn').addEventListener('click', loadComponents);
 
-    // Close modals when clicking outside
     window.addEventListener('click', function(event) {
         if (event.target === componentModal) {
             closeModal();
@@ -386,5 +481,4 @@ function initializeApp() {
     }
 }
 
-// Start the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', initializeApp);
