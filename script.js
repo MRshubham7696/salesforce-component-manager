@@ -181,14 +181,51 @@ async function loadComponents() {
         
         try {
             const file = await githubRequest('contents/components.json');
-            const encryptedContent = atob(file.content);
+            const rawContent = atob(file.content);
+            fileSha = file.sha; // Make sure to set the SHA
             
-            // Decrypt the content
-            const content = await decryptData(encryptedContent, githubConfig.encryptionPassword);
+            console.log('Loaded file SHA:', fileSha);
+            
+            let content;
+            
+            try {
+                // First, try to parse as JSON (existing unencrypted data)
+                content = JSON.parse(rawContent);
+                
+                // Check if this is already encrypted data format
+                if (content.encrypted === true) {
+                    // This is encrypted data, try to decrypt
+                    content = await decryptData(rawContent, githubConfig.encryptionPassword);
+                } else {
+                    // This is legacy unencrypted data, migrate it
+                    console.log('Found legacy unencrypted data, migrating to encrypted format...');
+                    
+                    // Extract components from legacy format
+                    components = content.components || [];
+                    
+                    // Save in encrypted format (this will update the file)
+                    const migrationSuccess = await saveComponents();
+                    
+                    if (migrationSuccess) {
+                        alert('Your existing data has been successfully migrated to encrypted format for better security!');
+                    } else {
+                        throw new Error('Failed to migrate data to encrypted format');
+                    }
+                    
+                    displayComponents(components);
+                    showLoading(false);
+                    return;
+                }
+            } catch (jsonError) {
+                // If JSON parsing fails, assume it's encrypted data
+                content = await decryptData(rawContent, githubConfig.encryptionPassword);
+            }
+            
             components = content.components || [];
-            fileSha = file.sha;
+            
         } catch (error) {
             if (error.message.includes('404')) {
+                // File doesn't exist yet
                 components = [];
                 fileSha = null;
             } else if (error.name === 'OperationError' || error.message.includes('decrypt')) {
@@ -229,13 +266,17 @@ async function saveComponents() {
             branch: githubConfig.branch
         };
 
+        // IMPORTANT: Always include sha when updating existing file
         if (fileSha) {
             commitData.sha = fileSha;
         }
 
+        console.log('Saving with data:', { hasSha: !!fileSha, sha: fileSha });
+        
         const result = await githubRequest('contents/components.json', 'PUT', commitData);
         fileSha = result.content.sha;
         
+        console.log('Save successful, new SHA:', fileSha);
         return true;
     } catch (error) {
         console.error("Error saving components:", error);
