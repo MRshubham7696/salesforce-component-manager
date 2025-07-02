@@ -72,6 +72,23 @@
                         <label for="githubToken">Personal Access Token:</label>
                         <input type="password" id="githubToken" placeholder="Paste your token here">
                     </div>
+                    <div class="form-group">
+                        <label for="encryptionPassword">Encryption Password:</label>
+                        <input type="password" id="encryptionPassword" placeholder="Choose a strong password" required>
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                            🔒 This password encrypts your data. Keep it safe - losing it means losing access to your components!
+                        </small>
+                    </div>
+                </div>
+
+                <div class="security-notice" style="background: #e7f3ff; border: 1px solid #b3d9ff; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <h4 style="margin: 0 0 10px 0; color: #0066cc;">🔐 Security Features:</h4>
+                    <ul style="margin: 0; padding-left: 20px; color: #0066cc;">
+                        <li>Your data is encrypted before being stored on GitHub</li>
+                        <li>Even if someone accesses your repository, they cannot read your data without the password</li>
+                        <li>The encryption password is stored locally and never sent to GitHub</li>
+                        <li>Uses AES-256-GCM encryption with PBKDF2 key derivation</li>
+                    </ul>
                 </div>
 
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
