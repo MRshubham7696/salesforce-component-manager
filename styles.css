@@ -311,7 +311,7 @@ body {
 
 .form-group textarea {
     resize: vertical;
-    min-height: 400px;
+    min-height: 300px;
 }
 
 /* Empty State */
